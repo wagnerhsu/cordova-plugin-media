@@ -24,6 +24,7 @@
 #define HTTP_SCHEME_PREFIX @"http://"
 #define HTTPS_SCHEME_PREFIX @"https://"
 #define CDVFILE_PREFIX @"cdvfile://"
+#define FILE_PREFIX @"file://"
 
 @implementation CDVSound
 
@@ -70,6 +71,9 @@ BOOL keepAvAudioSessionAlwaysActive = NO;
             resourceURL = [NSURL URLWithString:resourcePath];
         }
     } else {
+        if ([resourcePath hasPrefix:FILE_PREFIX]) { // Support file scheme
+            resourcePath = [resourcePath substringFromIndex:[FILE_PREFIX length]];
+        }
         // if resourcePath is not from FileSystem put in tmp dir, else attempt to use provided resource path
         NSString* tmpPath = [NSTemporaryDirectory()stringByStandardizingPath];
         BOOL isTmp = [resourcePath rangeOfString:tmpPath].location != NSNotFound;
@@ -114,6 +118,9 @@ BOOL keepAvAudioSessionAlwaysActive = NO;
             resourceURL = [NSURL URLWithString:resourcePath];
         }
     } else {
+        if ([resourcePath hasPrefix:FILE_PREFIX]) { // Support file scheme
+            resourcePath = [resourcePath substringFromIndex:[FILE_PREFIX length]];
+        }
         // attempt to find file path in www directory or LocalFileSystem.TEMPORARY directory
         filePath = [self.commandDelegate pathForResource:resourcePath];
         if (filePath == nil) {
@@ -626,6 +633,7 @@ BOOL keepAvAudioSessionAlwaysActive = NO;
                 avPlayer = nil;
             }
             if (! keepAvAudioSessionAlwaysActive && self.avSession && ! [self isPlayingOrRecording]) {
+                [self.avSession setCategory:AVAudioSessionCategorySoloAmbient error:nil];
                 [self.avSession setActive:NO error:nil];
                 self.avSession = nil;
             }
@@ -650,6 +658,10 @@ BOOL keepAvAudioSessionAlwaysActive = NO;
     if (avPlayer) {
        CMTime time = [avPlayer currentTime];
        position = CMTimeGetSeconds(time);
+    }
+
+    if (isnan(position)){
+        position = -1;
     }
 
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDouble:position];
