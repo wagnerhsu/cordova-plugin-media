@@ -54,8 +54,23 @@ cordova plugin add cordova-plugin-media
 
 - Android
 - iOS
-- Windows
 - Browser
+
+### Android Quirks
+
+#### SDK Target Less Than 29
+
+From the official [Storage updates in Android 11](https://developer.android.com/about/versions/11/privacy/storage) documentation, the [`WRITE_EXTERNAL_STORAGE`](https://developer.android.com/reference/android/Manifest.permission#WRITE_EXTERNAL_STORAGE) permission is no longer operational and does not provide access.
+
+> If this permission is not allowlisted for an app that targets an API level before [`Build.VERSION_CODES.Q`](https://developer.android.com/reference/android/os/Build.VERSION_CODES#Q) (SDK 29) this permission cannot be granted to apps.
+
+If you need to add this permission, please add the following to your `config.xml`.
+
+```xml
+<config-file target="AndroidManifest.xml" parent="/*" xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+</config-file>
+```
 
 ## Media
 
@@ -516,7 +531,6 @@ Starts recording an audio file.
 
 - Android
 - iOS
-- Windows
 
 ### Quick Example
 
@@ -570,14 +584,6 @@ To add this entry into the `info.plist`, you can use the `edit-config` tag in th
 </edit-config>
 ```
 
-### Windows Quirks
-
-- Windows devices can use MP3, M4A and WMA formats for recorded audio. However in most cases it is not possible to use MP3 for audio recording on _Windows Phone 8.1_ devices, because an MP3 encoder is [not shipped with Windows Phone](https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.mediaproperties.mediaencodingprofile.createmp3.aspx).
-
-- If a full path is not provided, the recording is placed in the `AppData/temp` directory. This can be accessed via the `File` API using `LocalFileSystem.TEMPORARY` or `ms-appdata:///temp/<filename>` URI.
-
-- Any subdirectory specified at record time must already exist.
-
 ## media.stop
 
 Stops playing an audio file.
@@ -622,7 +628,6 @@ Stops recording an audio file.
 
 - Android
 - iOS
-- Windows
 
 ### Quick Example
 
